@@ -34,15 +34,24 @@ public class MainWindowViewModel : BaseNotification
         Recipe = new Recipe();
 
         CommandSearch = new LambdaCommand(_ => true, async _ => await GetData());
+        CommandClear = new LambdaCommand(_ => true, _ => Clear());
     }
 
     private async Task GetData()
     {
         var r = await EdaMamApi.GetRecipesAsync(Search);
         var t = await RecipesConverter.ConvertAsync(r);
+        
+        Recipes.Clear();
         foreach (var recipe in t)
         {
             Recipes.Add(recipe);
         }
+        Clear();
+    }
+
+    private void Clear()
+    {
+        Search = string.Empty;
     }
 }

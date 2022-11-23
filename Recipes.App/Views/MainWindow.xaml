@@ -43,8 +43,11 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             
-            <StackPanel Grid.Column="1">
-                <!-- TODO Создать отображение рецепта -->
+            <StackPanel Grid.Column="1"
+                        DataContext="{Binding Recipe}">
+                <Image Source="{Binding Image}" Width="150"/>
+                <TextBlock Text="{Binding Title}"/>
+                <ListBox ItemsSource="{Binding Ingredients}"/>
             </StackPanel>
         </Grid>
 
