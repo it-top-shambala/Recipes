@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Recipes.App.Commands;
-using Recipes.App.Models;
+using Recipes.App.Lib;
+using Recipes.Models;
+using Recipe = Recipes.App.Models.Recipe;
 
 namespace Recipes.App.ViewModels;
 
@@ -29,5 +32,17 @@ public class MainWindowViewModel : BaseNotification
     {
         Recipes = new ObservableCollection<Recipe>();
         Recipe = new Recipe();
+
+        CommandSearch = new LambdaCommand(_ => true, async _ => await GetData());
+    }
+
+    private async Task GetData()
+    {
+        var r = await EdaMamApi.GetRecipesAsync(Search);
+        var t = await RecipesConverter.ConvertAsync(r);
+        foreach (var recipe in t)
+        {
+            Recipes.Add(recipe);
+        }
     }
 }
