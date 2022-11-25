@@ -27,23 +27,28 @@ public class MainWindowViewModel : BaseNotification
 
     public LambdaCommand CommandSearch { get; set; }
     public LambdaCommand CommandClear { get; set; }
+    public LambdaCommand CommandSaveToDb { get; set; }
+    public LambdaCommand CommandShowFavorite { get; set; }
+
+    private DataBase _db;
 
     public MainWindowViewModel()
     {
+        _db = new DataBase();
+        
         Recipes = new ObservableCollection<Recipe>();
         Recipe = new Recipe();
 
         CommandSearch = new LambdaCommand(_ => true, async _ => await GetData());
         CommandClear = new LambdaCommand(_ => true, _ => Clear());
+        CommandSaveToDb = new LambdaCommand(_ => true, async _ => await SaveToDbAsync());
+        CommandShowFavorite = new LambdaCommand(_ => true, _ => ShowFavorite());
     }
 
     private async Task GetData()
     {
-        var r = await EdaMamApi.GetRecipesAsync(Search);
-        var t = await RecipesConverter.ConvertAsync(r);
-        
         Recipes.Clear();
-        foreach (var recipe in t)
+        await foreach (var recipe in RecipesConverter.ConvertAsync(await EdaMamApi.GetRecipesAsync(Search)))
         {
             Recipes.Add(recipe);
         }
@@ -53,5 +58,20 @@ public class MainWindowViewModel : BaseNotification
     private void Clear()
     {
         Search = string.Empty;
+    }
+
+    private async Task SaveToDbAsync()
+    {
+        await _db.AddRecipeAsync(Recipe);
+    }
+
+    private void ShowFavorite()
+    {
+        Recipes.Clear();
+
+        foreach (var recipe in _db.Recipes)
+        {
+            Recipes.Add(recipe);
+        }
     }
 }
